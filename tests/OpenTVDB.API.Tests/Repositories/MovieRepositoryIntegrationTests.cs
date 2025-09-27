@@ -1,4 +1,5 @@
 using FluentAssertions;
+using OpenTVDB.API.QueryParams;
 using OpenTVDB.API.Repositories;
 
 namespace OpenTVDB.API.Tests.Repositories;
@@ -17,14 +18,34 @@ public class MovieRepositoryIntegrationTests : DBTest
     [Fact]
     public async Task Search_ShouldReturnTheMovie()
     {
-        var expectedMovie = DataFactory.Many(DataFactory.Movie, 10);
-        Context.Movies.AddRange(expectedMovie);
+        var queryParams = new MovieSearchQueryParams();
+        var expectedMovies = DataFactory.Many(DataFactory.Movie, 10);
+        Context.Movies.AddRange(expectedMovies);
         await Context.SaveChangesAsync();
 
-        var movie = await _repository.Search();
+        var movies = await _repository.Search(queryParams);
 
-        movie.Count.Should().Be(expectedMovie.Count);
-        movie.Should().BeEquivalentTo(expectedMovie);
+        movies.Count.Should().Be(expectedMovies.Count);
+        movies.Should().BeEquivalentTo(expectedMovies);
+    }
+
+    [Fact]
+    public async Task Search_ShouldReturnMoviesContainingTheGivenName_WhenTheQueryIsProvided()
+    {
+        var queryParams = new MovieSearchQueryParams()
+        {
+            Query = "Hunter"
+        };
+        var expectedMovie = DataFactory.Movie(x => x.Title = "Hunter x Hunter");
+        var unexpectedMovies = DataFactory.Many(DataFactory.Movie, 10);
+        Context.Movies.AddRange(expectedMovie);
+        Context.Movies.AddRange(unexpectedMovies);
+        await Context.SaveChangesAsync();
+
+        var movies = await _repository.Search(queryParams);
+
+        movies.Count.Should().Be(1);
+        movies.Should().BeEquivalentTo([expectedMovie]);
     }
 
     #endregion

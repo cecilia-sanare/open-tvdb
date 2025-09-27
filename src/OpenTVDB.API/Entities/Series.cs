@@ -1,5 +1,5 @@
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using NJsonSchema.Annotations;
 
 namespace OpenTVDB.API.Entities;
 
@@ -7,7 +7,7 @@ public class Series : AuditEntity
 {
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public Guid? Id { get; set; }
-    
-    [JsonSchemaIgnore]
-    public string? Title { get; set; }
+
+    [MaxLength(100)]
+    public required string Title { get; set; }
 }

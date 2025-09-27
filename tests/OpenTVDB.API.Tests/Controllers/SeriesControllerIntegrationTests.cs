@@ -1,7 +1,10 @@
 using System.Net;
 using System.Net.Http.Json;
 using FluentAssertions;
+using Flurl;
+using Microsoft.AspNetCore.WebUtilities;
 using OpenTVDB.API.Entities;
+using OpenTVDB.API.QueryParams;
 
 namespace OpenTVDB.API.Tests.Controllers;
 
@@ -24,6 +27,27 @@ public class SeriesControllerIntegrationTests(WebApplicationFactoryTest factory)
         series.Should().NotBeNull();
         series.Count.Should().Be(expectedSeries.Count);
         series.Should().BeEquivalentTo(expectedSeries);
+    }
+
+    [Fact]
+    public async Task Search_ShouldReturnSeriesContainingTheGivenName_WhenTheQueryIsProvided()
+    {
+        var queryParams = new SeriesSearchQueryParams()
+        {
+            Query = "Hunter"
+        };
+        var expectedSeries = DataFactory.Series(x => x.Title = "Hunter x Hunter");
+        var unexpectedSeries = DataFactory.Many(DataFactory.Series, 10);
+        Context.Series.AddRange(expectedSeries);
+        Context.Series.AddRange(unexpectedSeries);
+        await Context.SaveChangesAsync();
+
+        var client = Factory.CreateClient();
+        var series = await client.GetFromJsonAsync<List<Series>>("/Series".SetQueryParams(queryParams));
+
+        series.Should().NotBeNull();
+        series.Count.Should().Be(1);
+        series.Should().BeEquivalentTo([expectedSeries]);
     }
 
     #endregion

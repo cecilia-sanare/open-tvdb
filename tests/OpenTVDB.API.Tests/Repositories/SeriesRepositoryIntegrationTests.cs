@@ -1,4 +1,5 @@
 using FluentAssertions;
+using OpenTVDB.API.QueryParams;
 using OpenTVDB.API.Repositories;
 
 namespace OpenTVDB.API.Tests.Repositories;
@@ -17,14 +18,34 @@ public class SeriesRepositoryIntegrationTests : DBTest
     [Fact]
     public async Task Search_ShouldReturnTheSeries()
     {
+        var queryParams = new SeriesSearchQueryParams();
         var expectedSeries = DataFactory.Many(DataFactory.Series, 10);
         Context.Series.AddRange(expectedSeries);
         await Context.SaveChangesAsync();
 
-        var series = await _repository.Search();
+        var series = await _repository.Search(queryParams);
 
         series.Count.Should().Be(expectedSeries.Count);
         series.Should().BeEquivalentTo(expectedSeries);
+    }
+
+    [Fact]
+    public async Task Search_ShouldReturnSeriesContainingTheGivenName_WhenTheQueryIsProvided()
+    {
+        var queryParams = new SeriesSearchQueryParams()
+        {
+            Query = "Hunter"
+        };
+        var expectedSeries = DataFactory.Series(x => x.Title = "Hunter x Hunter");
+        var unexpectedSeries = DataFactory.Many(DataFactory.Series, 10);
+        Context.Series.AddRange(expectedSeries);
+        Context.Series.AddRange(unexpectedSeries);
+        await Context.SaveChangesAsync();
+
+        var movies = await _repository.Search(queryParams);
+
+        movies.Count.Should().Be(1);
+        movies.Should().BeEquivalentTo([expectedSeries]);
     }
 
     #endregion

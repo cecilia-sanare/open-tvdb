@@ -1,6 +1,7 @@
 using FluentAssertions;
 using Moq;
 using OpenTVDB.API.Entities;
+using OpenTVDB.API.QueryParams;
 using OpenTVDB.API.Repositories;
 using OpenTVDB.API.Services;
 
@@ -21,10 +22,11 @@ public class SeriesServiceTest
     [Fact]
     public async Task Search_ShouldReturnTheSeries()
     {
+        var queryParams = new SeriesSearchQueryParams();
         var expectedSeries = DataFactory.Many(DataFactory.Series, 10);
-        _repository.Setup(x => x.Search()).ReturnsAsync(expectedSeries);
+        _repository.Setup(x => x.Search(queryParams)).ReturnsAsync(expectedSeries);
 
-        var series = await _service.Search();
+        var series = await _service.Search(queryParams);
 
         series.Should().BeEquivalentTo(expectedSeries);
     }

@@ -1,11 +1,12 @@
 using OpenTVDB.API.Repositories;
 using OpenTVDB.API.Entities;
+using OpenTVDB.API.QueryParams;
 
 namespace OpenTVDB.API.Services;
 
 public interface ISeriesService
 {
-    Task<List<Series>> Search();
+    Task<List<Series>> Search(SeriesSearchQueryParams queryParams);
     Task<Series?> Get(Guid id);
     Task<Series> Create(Series media);
     Task<Series> Update(Series media);
@@ -13,9 +14,9 @@ public interface ISeriesService
 
 public class SeriesService(ISeriesRepository repository) : ISeriesService
 {
-    public Task<List<Series>> Search()
+    public Task<List<Series>> Search(SeriesSearchQueryParams queryParams)
     {
-        return repository.Search();
+        return repository.Search(queryParams);
     }
 
     public Task<Series?> Get(Guid id)

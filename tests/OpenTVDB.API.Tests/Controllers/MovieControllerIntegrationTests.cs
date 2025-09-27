@@ -1,7 +1,9 @@
 using System.Net;
 using System.Net.Http.Json;
 using FluentAssertions;
+using Flurl;
 using OpenTVDB.API.Entities;
+using OpenTVDB.API.QueryParams;
 
 namespace OpenTVDB.API.Tests.Controllers;
 
@@ -24,6 +26,27 @@ public class MovieControllerIntegrationTests(WebApplicationFactoryTest factory) 
         movie.Should().NotBeNull();
         movie.Count.Should().Be(expectedMovie.Count);
         movie.Should().BeEquivalentTo(expectedMovie);
+    }
+
+    [Fact]
+    public async Task Search_ShouldReturnMovieContainingTheGivenName_WhenTheQueryIsProvided()
+    {
+        var queryParams = new MovieSearchQueryParams()
+        {
+            Query = "Hunter"
+        };
+        var expectedMovie = DataFactory.Movie(x => x.Title = "Hunter x Hunter");
+        var unexpectedMovie = DataFactory.Many(DataFactory.Movie, 10);
+        Context.Movies.AddRange(expectedMovie);
+        Context.Movies.AddRange(unexpectedMovie);
+        await Context.SaveChangesAsync();
+
+        var client = Factory.CreateClient();
+        var movies = await client.GetFromJsonAsync<List<Movie>>("/Movie".SetQueryParams(queryParams));
+
+        movies.Should().NotBeNull();
+        movies.Count.Should().Be(1);
+        movies.Should().BeEquivalentTo([expectedMovie]);
     }
 
     #endregion

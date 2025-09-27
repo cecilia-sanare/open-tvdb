@@ -1,11 +1,12 @@
 using OpenTVDB.API.Repositories;
 using OpenTVDB.API.Entities;
+using OpenTVDB.API.QueryParams;
 
 namespace OpenTVDB.API.Services;
 
 public interface IMovieService
 {
-    Task<List<Movie>> Search();
+    Task<List<Movie>> Search(MovieSearchQueryParams queryParams);
     Task<Movie?> Get(Guid id);
     Task<Movie> Create(Movie media);
     Task<Movie> Update(Movie media);
@@ -13,9 +14,9 @@ public interface IMovieService
 
 public class MovieService(IMovieRepository repository) : IMovieService
 {
-    public Task<List<Movie>> Search()
+    public Task<List<Movie>> Search(MovieSearchQueryParams queryParams)
     {
-        return repository.Search();
+        return repository.Search(queryParams);
     }
 
     public Task<Movie?> Get(Guid id)

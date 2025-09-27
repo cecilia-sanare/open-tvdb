@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OpenTVDB.API.Entities;
+using OpenTVDB.API.QueryParams;
 using OpenTVDB.API.Services;
 
 namespace OpenTVDB.API.Controllers;
@@ -11,9 +12,9 @@ public class SeriesController(ISeriesService service) : ControllerBase
 {
     [HttpGet]
     [ProducesResponseType(200)]
-    public async Task<ActionResult<List<Series>>> Search()
+    public async Task<ActionResult<List<Series>>> Search([FromQuery] SeriesSearchQueryParams queryParams)
     {
-        return await service.Search();
+        return await service.Search(queryParams);
     }
 
     [HttpGet("{id:guid}")]

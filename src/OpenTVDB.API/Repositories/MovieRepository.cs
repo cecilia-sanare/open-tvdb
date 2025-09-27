@@ -1,12 +1,13 @@
 using Microsoft.EntityFrameworkCore;
 using OpenTVDB.API.Database;
 using OpenTVDB.API.Entities;
+using OpenTVDB.API.QueryParams;
 
 namespace OpenTVDB.API.Repositories;
 
 public interface IMovieRepository
 {
-    Task<List<Movie>> Search();
+    Task<List<Movie>> Search(MovieSearchQueryParams queryParams);
     Task<Movie?> Get(Guid id);
     Task<Movie> Create(Movie item);
     Task<Movie> Update(Movie item);
@@ -14,9 +15,16 @@ public interface IMovieRepository
 
 public class MovieRepository(OpenTVDBContext context) : IMovieRepository
 {
-    public Task<List<Movie>> Search()
+    public Task<List<Movie>> Search(MovieSearchQueryParams queryParams)
     {
-        return context.Movies.ToListAsync();
+        var query = context.Movies.AsQueryable();
+
+        if (queryParams.Query != null)
+        {
+            query = query.Where(x => x.Title.Contains(queryParams.Query));
+        }
+
+        return query.ToListAsync();
     }
 
     public Task<Movie?> Get(Guid id)
