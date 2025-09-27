@@ -7,7 +7,7 @@ using OpenTVDB.API.QueryParams;
 
 namespace OpenTVDB.API.Tests.Controllers;
 
-public class MovieControllerIntegrationTests(WebApplicationFactoryTest factory) : ControllerTest(factory)
+public class MovieControllerIntegrationTests(WebApplicationFactoryTest factory) : DatabaseTest(factory)
 {
     #region Search
 

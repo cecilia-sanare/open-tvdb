@@ -1,24 +1,28 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using OpenTVDB.API.Database;
 
 namespace OpenTVDB.API.Tests;
 
-public class DBTest : IAsyncLifetime
+public class DatabaseTest : IClassFixture<WebApplicationFactoryTest>, IAsyncLifetime
 {
     protected readonly OpenTVDBContext Context;
+    protected readonly WebApplicationFactoryTest Factory;
+
     protected DateTime TestStart = DateTime.UtcNow;
 
-    protected DBTest()
+    public DatabaseTest(WebApplicationFactoryTest factory)
     {
-        var builder = new DbContextOptionsBuilder<OpenTVDBContext>()
-            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString());
+        Factory = factory;
 
-        Context = new OpenTVDBContext(builder.Options);
+        var scope = Factory.Services.CreateScope();
+        Context = scope.ServiceProvider.GetRequiredService<OpenTVDBContext>();
     }
 
     public Task InitializeAsync()
     {
         TestStart = DateTime.UtcNow;
+
         return Task.CompletedTask;
     }
 

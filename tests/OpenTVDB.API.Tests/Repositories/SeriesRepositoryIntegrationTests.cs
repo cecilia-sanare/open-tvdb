@@ -4,11 +4,11 @@ using OpenTVDB.API.Repositories;
 
 namespace OpenTVDB.API.Tests.Repositories;
 
-public class SeriesRepositoryIntegrationTests : DBTest
+public class SeriesRepositoryIntegrationTests : DatabaseTest
 {
     private readonly SeriesRepository _repository;
 
-    public SeriesRepositoryIntegrationTests()
+    public SeriesRepositoryIntegrationTests(WebApplicationFactoryTest factory) : base(factory)
     {
         _repository = new SeriesRepository(Context);
     }

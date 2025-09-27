@@ -3,7 +3,7 @@ using OpenTVDB.API.Database;
 using OpenTVDB.API.Repositories;
 using OpenTVDB.API.Services;
 using Scalar.AspNetCore;
-using OpenTVDB.API;
+using OpenTVDB.API.Enums;
 
 namespace OpenTVDB.API;
 
@@ -11,21 +11,55 @@ public class Program
 {
     public static void Main(string[] args)
     {
+        var isTestEnvironment = AppDomain.CurrentDomain.GetAssemblies().Any(a => a.FullName != null && a.FullName.StartsWith("xunit"));
+
         var builder = WebApplication.CreateBuilder(args);
-        ConfigureServices(builder.Services);
+
+        if (isTestEnvironment)
+        {
+            builder.Configuration.Sources.Clear();
+            builder.Configuration.AddJsonFile("appsettings.Testing.json");
+        }
+
+        var config = builder.Configuration.Get<Config>();
+
+        if (config == null) throw new Exception("Failed to load config.");
+
+        ConfigureServices(config, builder.Services);
 
         var app = ConfigureApp(builder.Build());
+
+        // Run migrations on startup
+        if (config.Database.Type != DatabaseType.InMemory)
+        {
+            using var scope = app.Services.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<OpenTVDBContext>();
+            db.Database.Migrate();
+        }
 
         app.Run();
     }
 
-    public static void ConfigureServices(IServiceCollection services)
+    public static void ConfigureServices(Config config, IServiceCollection services)
     {
         // Configure how controllers are handled
         services.AddControllers();
         services.Configure<RouteOptions>(options => options.LowercaseUrls = true);
 
-        services.AddDbContext<OpenTVDBContext>(options => options.UseInMemoryDatabase("open-tvdb"));
+        services.AddDbContext<OpenTVDBContext>(options =>
+        {
+            switch (config.Database.Type)
+            {
+                case DatabaseType.InMemory:
+                    options.UseInMemoryDatabase(config.Database.ConnectionString);
+                    break;
+                case DatabaseType.Sqlite:
+                    options.UseSqlite(config.Database.ConnectionString);
+                    break;
+                default:
+                    throw new Exception($"Unknown database type. {config.Database.Type}");
+            }
+        });
 
         // Add our services
         services
