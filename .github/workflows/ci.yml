@@ -27,7 +27,7 @@ jobs:
         run: dotnet build --no-restore
 
       - name: Test with the dotnet CLI
-        run: dotnet test --no-build --collect:"XPlat Code Coverage;Format=lcov"
+        run: dotnet test --collect:"XPlat Code Coverage" --settings coverlet.runsettings
 
       - name: Coveralls
         uses: coverallsapp/github-action@v2
