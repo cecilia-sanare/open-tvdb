@@ -5,57 +5,68 @@ using OpenTVDB.API.Services;
 using Scalar.AspNetCore;
 using OpenTVDB.API;
 
-void ConfigureServices(IServiceCollection services)
+namespace OpenTVDB.API;
+
+public class Program
 {
-    // Configure how controllers are handled
-    services.AddControllers();
-    services.Configure<RouteOptions>(options => options.LowercaseUrls = true);
-
-    services.AddDbContext<OpenTVDBContext>(options => options.UseInMemoryDatabase("open-tvdb"));
-
-    // Add our services
-    services
-        .AddScoped<ISeriesService, SeriesService>()
-        .AddScoped<IMovieService, MovieService>();
-
-    // Add our Repositories
-    services
-        .AddScoped<ISeriesRepository, SeriesRepository>()
-        .AddScoped<IMovieRepository, MovieRepository>();
-
-    // Generate OpenAPI Output
-    services.AddOpenApiDocument(configure =>
+    public static void Main(string[] args)
     {
-        configure.DocumentProcessors.Add(new CustomSchemaIgnoreDocumentProcessor());
-    });
-}
+        var builder = WebApplication.CreateBuilder(args);
+        ConfigureServices(builder.Services);
 
-var builder = WebApplication.CreateBuilder(args);
+        var app = ConfigureApp(builder.Build());
 
-ConfigureServices(builder.Services);
+        app.Run();
+    }
 
-var app = builder.Build();
+    public static void ConfigureServices(IServiceCollection services)
+    {
+        // Configure how controllers are handled
+        services.AddControllers();
+        services.Configure<RouteOptions>(options => options.LowercaseUrls = true);
 
-app.MapControllers();
+        services.AddDbContext<OpenTVDBContext>(options => options.UseInMemoryDatabase("open-tvdb"));
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseOpenApi(options => { options.Path = "/openapi/v1.json"; });
+        // Add our services
+        services
+            .AddScoped<ISeriesService, SeriesService>()
+            .AddScoped<IMovieService, MovieService>();
 
-    app.MapScalarApiReference(options =>
-        options.WithTitle("OpenTVDB API")
-            .WithTheme(ScalarTheme.BluePlanet)
-            .WithDarkModeToggle(false)
-    );
-}
-else
-{
-    app.UseHttpsRedirection();
-}
+        // Add our Repositories
+        services
+            .AddScoped<ISeriesRepository, SeriesRepository>()
+            .AddScoped<IMovieRepository, MovieRepository>();
 
-app.Run();
+        // Generate OpenAPI Output
+        services.AddOpenApiDocument(configure =>
+        {
+            configure.DocumentProcessors.Add(new CustomSchemaIgnoreDocumentProcessor());
+        });
+    }
 
-public partial class Program
-{
+    public static WebApplication ConfigureApp(WebApplication app)
+    {
+        app.MapControllers();
+
+        // Configure the HTTP request pipeline.
+        if (app.Environment.IsDevelopment())
+        {
+            app.UseOpenApi(options =>
+            {
+                options.Path = "/openapi/v1.json";
+            });
+
+            app.MapScalarApiReference(options =>
+                options.WithTitle("OpenTVDB API")
+                    .WithTheme(ScalarTheme.BluePlanet)
+                    .WithDarkModeToggle(false)
+            );
+        }
+        else
+        {
+            app.UseHttpsRedirection();
+        }
+
+        return app;
+    }
 }
