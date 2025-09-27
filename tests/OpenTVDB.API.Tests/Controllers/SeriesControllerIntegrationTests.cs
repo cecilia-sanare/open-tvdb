@@ -16,7 +16,7 @@ public class SeriesControllerIntegrationTests(WebApplicationFactoryTest factory)
         Context.Series.AddRange(expectedSeries);
         await Context.SaveChangesAsync();
 
-        var client = factory.CreateClient();
+        var client = Factory.CreateClient();
 
         var response = await client.GetAsync("/Series");
         var series = await response.Content.ReadFromJsonAsync<List<Series>>();
@@ -28,6 +28,35 @@ public class SeriesControllerIntegrationTests(WebApplicationFactoryTest factory)
 
     #endregion
 
+    #region Get
+
+    [Fact]
+    public async Task Get_ShouldReturnTheSeries()
+    {
+        var expectedSeries = DataFactory.Series();
+        Context.Series.AddRange(expectedSeries);
+        await Context.SaveChangesAsync();
+
+        var client = Factory.CreateClient();
+
+        var response = await client.GetAsync($"/Series/{expectedSeries.Id}");
+        var series = await response.Content.ReadFromJsonAsync<Series>();
+
+        series.Should().BeEquivalentTo(expectedSeries);
+    }
+
+    [Fact]
+    public async Task Get_ShouldReturnNotFound_WhenTheSeriesDoesNotExist()
+    {
+        var client = Factory.CreateClient();
+
+        var response = await client.GetAsync($"/Series/{Guid.NewGuid()}");
+
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    #endregion
+
     #region Create
 
     [Fact]
@@ -35,7 +64,7 @@ public class SeriesControllerIntegrationTests(WebApplicationFactoryTest factory)
     {
         var expectedSeries = DataFactory.Series();
 
-        var client = factory.CreateClient();
+        var client = Factory.CreateClient();
 
         var response = await client.PostAsJsonAsync("/Series", expectedSeries);
         var series = await response.Content.ReadFromJsonAsync<Series>();
@@ -43,7 +72,8 @@ public class SeriesControllerIntegrationTests(WebApplicationFactoryTest factory)
         series.Should().NotBeNull();
         series.Id.Should().NotBeNull();
         series.Created.Should().BeAfter(TestStart);
-        series.Should().BeEquivalentTo(expectedSeries, options => options.Excluding(x => x.Id).Excluding(x => x.Created));
+        series.Should()
+            .BeEquivalentTo(expectedSeries, options => options.Excluding(x => x.Id).Excluding(x => x.Created));
     }
 
     #endregion
@@ -53,31 +83,43 @@ public class SeriesControllerIntegrationTests(WebApplicationFactoryTest factory)
     [Fact]
     public async Task Update_ShouldUpdateTheSeries()
     {
-      var expectedSeries = DataFactory.Series();
-      Context.Series.AddRange(expectedSeries);
-      await Context.SaveChangesAsync();
+        var expectedSeries = DataFactory.Series();
+        Context.Series.AddRange(expectedSeries);
+        await Context.SaveChangesAsync();
 
-      var client = factory.CreateClient();
+        var client = Factory.CreateClient();
 
-      var response = await client.PutAsJsonAsync($"/Series/{expectedSeries.Id}", expectedSeries);
-      var series = await response.Content.ReadFromJsonAsync<Series>();
+        var response = await client.PutAsJsonAsync($"/Series/{expectedSeries.Id}", expectedSeries);
+        var series = await response.Content.ReadFromJsonAsync<Series>();
 
-      series.Should().NotBeNull();
-      series.Updated.Should().BeAfter(series.Created);
-      series.Should().BeEquivalentTo(expectedSeries, options => options.Excluding(x => x.Updated));
+        series.Should().NotBeNull();
+        series.Updated.Should().BeAfter(series.Created);
+        series.Should().BeEquivalentTo(expectedSeries, options => options.Excluding(x => x.Updated));
+    }
+
+    [Fact]
+    public async Task Update_ShouldReturnNotFound_WhenTheSeriesDoesNotExist()
+    {
+        var expectedSeries = DataFactory.Series(x => x.Id = Guid.NewGuid());
+
+        var client = Factory.CreateClient();
+
+        var response = await client.PutAsJsonAsync($"/Series/{expectedSeries.Id}", expectedSeries);
+
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
     [Fact]
     public async Task Update_ShouldReturnBadRequest_WhenIdIsInvalid()
     {
-      var client = factory.CreateClient();
+        var client = Factory.CreateClient();
 
-      var response = await client.PutAsJsonAsync($"/Series/{Guid.NewGuid()}", DataFactory.Series());
+        var response = await client.PutAsJsonAsync($"/Series/{Guid.NewGuid()}", DataFactory.Series());
 
-      response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
 
-      var message = await response.Content.ReadAsStringAsync();
-      message.Should().Contain("Invalid series id");
+        var message = await response.Content.ReadAsStringAsync();
+        message.Should().Contain("Invalid series id");
     }
 
     #endregion

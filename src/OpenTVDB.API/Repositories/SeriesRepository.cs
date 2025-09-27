@@ -7,6 +7,7 @@ namespace OpenTVDB.API.Repositories;
 public interface ISeriesRepository
 {
     Task<List<Series>> Search();
+    Task<Series?> Get(Guid id);
     Task<Series> Create(Series item);
     Task<Series> Update(Series item);
 }
@@ -17,7 +18,12 @@ public class SeriesRepository(OpenTVDBContext context) : ISeriesRepository
     {
         return context.Series.ToListAsync();
     }
-    
+
+    public Task<Series?> Get(Guid id)
+    {
+        return context.Series.SingleOrDefaultAsync(x => x.Id == id);
+    }
+
     public async Task<Series> Create(Series item)
     {
         context.Series.Add(item);
@@ -25,7 +31,7 @@ public class SeriesRepository(OpenTVDBContext context) : ISeriesRepository
 
         return item;
     }
-    
+
     public async Task<Series> Update(Series item)
     {
         context.Series.Update(item);

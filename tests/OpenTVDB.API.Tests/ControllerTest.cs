@@ -1,18 +1,22 @@
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Namotion.Reflection;
 using OpenTVDB.API.Database;
 
 namespace OpenTVDB.API.Tests;
 
-public class ControllerTest(WebApplicationFactoryTest factory) : IClassFixture<WebApplicationFactoryTest>, IAsyncLifetime
+public class ControllerTest(WebApplicationFactoryTest factory)
+    : IClassFixture<WebApplicationFactoryTest>, IAsyncLifetime
 {
     protected OpenTVDBContext Context = null!;
     protected DateTime TestStart = DateTime.UtcNow;
-    
+    protected WebApplicationFactoryTest Factory = factory;
+
     public Task InitializeAsync()
     {
         TestStart = DateTime.UtcNow;
-        
-        var scope = factory.Services.CreateScope();
+
+        var scope = Factory.Services.CreateScope();
         Context = scope.ServiceProvider.GetRequiredService<OpenTVDBContext>();
 
         return Task.CompletedTask;
@@ -20,9 +24,16 @@ public class ControllerTest(WebApplicationFactoryTest factory) : IClassFixture<W
 
     public async Task DisposeAsync()
     {
-        var entities = Context.ChangeTracker.Entries().Select(e => e.Entity);
-        Context.RemoveRange(entities);
-        await Context.SaveChangesAsync();
+        object[] series = await Context.Series.ToArrayAsync();
+        object[] movies = await Context.Movies.ToArrayAsync();
+        var entities = series.Concat(movies).ToList();
+
+        if (entities.Count > 0)
+        {
+            Context.RemoveRange(entities);
+            await Context.SaveChangesAsync();
+        }
+
         await Context.DisposeAsync();
     }
 }

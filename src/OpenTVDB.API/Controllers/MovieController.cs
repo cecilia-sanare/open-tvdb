@@ -7,18 +7,18 @@ namespace OpenTVDB.API.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class SeriesController(ISeriesService service) : ControllerBase
+public class MovieController(IMovieService service) : ControllerBase
 {
     [HttpGet]
     [ProducesResponseType(200)]
-    public async Task<ActionResult<List<Series>>> Search()
+    public async Task<ActionResult<List<Movie>>> Search()
     {
         return await service.Search();
     }
 
     [HttpGet("{id:guid}")]
     [ProducesResponseType(200)]
-    public async Task<ActionResult<Series>> Get([FromRoute] Guid id)
+    public async Task<ActionResult<Movie>> Get([FromRoute] Guid id)
     {
         var movie = await service.Get(id);
 
@@ -29,16 +29,16 @@ public class SeriesController(ISeriesService service) : ControllerBase
 
     [HttpPost]
     [ProducesResponseType(200)]
-    public async Task<ActionResult<Series>> Create(Series media)
+    public async Task<ActionResult<Movie>> Create(Movie media)
     {
         return await service.Create(media);
     }
 
     [HttpPut("{id:guid}")]
     [ProducesResponseType(200)]
-    public async Task<ActionResult<Series>> Update([FromRoute] Guid id, [FromBody] Series media)
+    public async Task<ActionResult<Movie>> Update([FromRoute] Guid id, [FromBody] Movie media)
     {
-        if (id != media.Id) return BadRequest("Invalid series id");
+        if (id != media.Id) return BadRequest("Invalid movie id");
 
         try
         {

@@ -1,4 +1,3 @@
-using Bogus;
 using Microsoft.EntityFrameworkCore;
 using OpenTVDB.API.Database;
 
@@ -6,7 +5,7 @@ namespace OpenTVDB.API.Tests;
 
 public class DBTest : IAsyncLifetime
 {
-    protected OpenTVDBContext Context = null!;
+    protected readonly OpenTVDBContext Context;
     protected DateTime TestStart = DateTime.UtcNow;
 
     protected DBTest()
@@ -16,7 +15,7 @@ public class DBTest : IAsyncLifetime
 
         Context = new OpenTVDBContext(builder.Options);
     }
-    
+
     public Task InitializeAsync()
     {
         TestStart = DateTime.UtcNow;
@@ -25,9 +24,19 @@ public class DBTest : IAsyncLifetime
 
     public async Task DisposeAsync()
     {
-        var entities = Context.ChangeTracker.Entries().Select(e => e.Entity);
-        Context.RemoveRange(entities);
-        await Context.SaveChangesAsync();
+        var (series, movies) = await (
+            Context.Series.ToArrayAsync(),
+            Context.Movies.ToArrayAsync()
+        );
+
+        var entities = series.Cast<object>().Concat(movies).ToArray();
+
+        if (entities.Length > 0)
+        {
+            Context.RemoveRange(entities);
+            await Context.SaveChangesAsync();
+        }
+
         await Context.DisposeAsync();
     }
 }
