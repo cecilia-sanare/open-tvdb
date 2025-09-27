@@ -46,6 +46,8 @@ public class Program
         services.AddControllers();
         services.Configure<RouteOptions>(options => options.LowercaseUrls = true);
 
+        services.AddHealthChecks();
+
         services.AddDbContext<OpenTVDBContext>(options =>
         {
             switch (config.Database.Type)
@@ -74,6 +76,8 @@ public class Program
         // Generate OpenAPI Output
         services.AddOpenApiDocument(configure =>
         {
+            configure.Title = "OpenTVDB API";
+            configure.Description = "The documentation for the OpenTVDB API.";
             configure.DocumentProcessors.Add(new CustomSchemaIgnoreDocumentProcessor());
         });
     }
@@ -81,6 +85,7 @@ public class Program
     public static WebApplication ConfigureApp(WebApplication app)
     {
         app.MapControllers();
+        app.MapHealthChecks("/api/health");
 
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
