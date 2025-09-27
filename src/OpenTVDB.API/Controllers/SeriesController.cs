@@ -14,20 +14,20 @@ public class SeriesController(ISeriesService service) : ControllerBase
     {
         return service.Search();
     }
-    
+
     [HttpPost]
     [ProducesResponseType(200)]
     public Task<Series> Create(Series media)
     {
         return service.Create(media);
     }
-    
+
     [HttpPut("{id:guid}")]
     [ProducesResponseType(200)]
     public async Task<ActionResult<Series>> Update([FromRoute] Guid id, [FromBody] Series media)
     {
-        if (id != media.Id) return BadRequest($"Path ID and Media ID do not match! ({id} != {media.Id})");
-        
+        if (id != media.Id) return BadRequest("Invalid series id");
+
         return await service.Update(media);
     }
 }

@@ -1,3 +1,4 @@
+using System.Net;
 using System.Net.Http.Json;
 using FluentAssertions;
 using OpenTVDB.API.Entities;
@@ -7,7 +8,7 @@ namespace OpenTVDB.API.Tests.Controllers;
 public class SeriesControllerIntegrationTests(WebApplicationFactoryTest factory) : ControllerTest(factory)
 {
     #region Search
-    
+
     [Fact]
     public async Task Search_ShouldReturnTheSeries()
     {
@@ -26,9 +27,9 @@ public class SeriesControllerIntegrationTests(WebApplicationFactoryTest factory)
     }
 
     #endregion
-    
+
     #region Create
-    
+
     [Fact]
     public async Task Create_ShouldCreateTheSeries()
     {
@@ -46,24 +47,37 @@ public class SeriesControllerIntegrationTests(WebApplicationFactoryTest factory)
     }
 
     #endregion
-    
+
     #region Update
-    
+
     [Fact]
     public async Task Update_ShouldUpdateTheSeries()
     {
-        var expectedSeries = DataFactory.Series();
-        Context.Series.AddRange(expectedSeries);
-        await Context.SaveChangesAsync();
+      var expectedSeries = DataFactory.Series();
+      Context.Series.AddRange(expectedSeries);
+      await Context.SaveChangesAsync();
 
-        var client = factory.CreateClient();
+      var client = factory.CreateClient();
 
-        var response = await client.PutAsJsonAsync($"/Series/{expectedSeries.Id}", expectedSeries);
-        var series = await response.Content.ReadFromJsonAsync<Series>();
+      var response = await client.PutAsJsonAsync($"/Series/{expectedSeries.Id}", expectedSeries);
+      var series = await response.Content.ReadFromJsonAsync<Series>();
 
-        series.Should().NotBeNull();
-        series.Updated.Should().BeAfter(series.Created);
-        series.Should().BeEquivalentTo(expectedSeries, options => options.Excluding(x => x.Updated));
+      series.Should().NotBeNull();
+      series.Updated.Should().BeAfter(series.Created);
+      series.Should().BeEquivalentTo(expectedSeries, options => options.Excluding(x => x.Updated));
+    }
+
+    [Fact]
+    public async Task Update_ShouldReturnBadRequest_WhenIdIsInvalid()
+    {
+      var client = factory.CreateClient();
+
+      var response = await client.PutAsJsonAsync($"/Series/{Guid.NewGuid()}", DataFactory.Series());
+
+      response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+
+      var message = await response.Content.ReadAsStringAsync();
+      message.Should().Contain("Invalid series id");
     }
 
     #endregion
