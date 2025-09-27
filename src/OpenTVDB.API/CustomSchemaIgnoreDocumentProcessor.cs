@@ -1,9 +1,14 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using NSwag.Generation.Processors;
 using NSwag.Generation.Processors.Contexts;
 
 namespace OpenTVDB.API;
 
+/// <summary>
+/// Purely for API Docs, don't bother validating
+/// </summary>
+[ExcludeFromCodeCoverage]
 public class CustomSchemaIgnoreDocumentProcessor : IDocumentProcessor
 {
     public void Process(DocumentProcessorContext context)
@@ -21,8 +26,8 @@ public class CustomSchemaIgnoreDocumentProcessor : IDocumentProcessor
                 .Where(property =>
                     type.GetProperty(
                         property.Key,
-                BindingFlags.Public | 
-                            BindingFlags.Instance | 
+                BindingFlags.Public |
+                            BindingFlags.Instance |
                             BindingFlags.IgnoreCase
                     )?.GetCustomAttribute<Annotations.SchemaIgnore>() != null
                 );
