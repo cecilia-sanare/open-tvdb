@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using OpenTVDB.API.Database;
 using OpenTVDB.API.Repositories;
@@ -7,6 +8,8 @@ using OpenTVDB.API.Enums;
 
 namespace OpenTVDB.API;
 
+// Not really testable
+[ExcludeFromCodeCoverage]
 public class Program
 {
     public static void Main(string[] args)
@@ -66,12 +69,14 @@ public class Program
         // Add our services
         services
             .AddScoped<ISeriesService, SeriesService>()
-            .AddScoped<IMovieService, MovieService>();
+            .AddScoped<IMovieService, MovieService>()
+            .AddScoped<ISearchItemService, SearchItemService>();
 
         // Add our Repositories
         services
             .AddScoped<ISeriesRepository, SeriesRepository>()
-            .AddScoped<IMovieRepository, MovieRepository>();
+            .AddScoped<IMovieRepository, MovieRepository>()
+            .AddScoped<ISearchItemRepository, SearchItemRepository>();
 
         // Generate OpenAPI Output
         services.AddOpenApiDocument(configure =>

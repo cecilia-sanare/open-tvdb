@@ -44,6 +44,31 @@ namespace OpenTVDB.API.Migrations
                     b.ToTable("Movies");
                 });
 
+            modelBuilder.Entity("OpenTVDB.API.Entities.SearchItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Slug")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id", "Type");
+
+                    b.ToTable((string)null);
+
+                    b.ToView("View_SearchItems", (string)null);
+                });
+
             modelBuilder.Entity("OpenTVDB.API.Entities.Series", b =>
                 {
                     b.Property<Guid>("Id")

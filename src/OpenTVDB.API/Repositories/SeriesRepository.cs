@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using OpenTVDB.API.Database;
 using OpenTVDB.API.Entities;
+using OpenTVDB.API.Extensions;
 using OpenTVDB.API.QueryParams;
 
 namespace OpenTVDB.API.Repositories;
@@ -36,6 +37,7 @@ public class SeriesRepository(OpenTVDBContext context) : ISeriesRepository
     {
         context.Series.Add(item);
         await context.SaveChangesAsync();
+        await context.RefreshMaterializedView("SearchItems");
 
         return item;
     }
@@ -44,6 +46,7 @@ public class SeriesRepository(OpenTVDBContext context) : ISeriesRepository
     {
         context.Series.Update(item);
         await context.SaveChangesAsync();
+        await context.RefreshMaterializedView("SearchItems");
 
         return item;
     }

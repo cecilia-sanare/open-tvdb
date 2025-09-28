@@ -1,8 +1,10 @@
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 
 namespace OpenTVDB.API.Database;
 
+[ExcludeFromCodeCoverage]
 public class OpenTVDBDesignContextFactory : IDesignTimeDbContextFactory<OpenTVDBContext>
 {
     public OpenTVDBContext CreateDbContext(string[] args)
