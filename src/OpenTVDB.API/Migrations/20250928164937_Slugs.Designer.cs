@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using OpenTVDB.API.Database;
 
@@ -10,9 +11,11 @@ using OpenTVDB.API.Database;
 namespace OpenTVDB.API.Migrations
 {
     [DbContext(typeof(OpenTVDBContext))]
-    partial class OpenTVDBContextModelSnapshot : ModelSnapshot
+    [Migration("20250928164937_Slugs")]
+    partial class Slugs
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.9");
@@ -42,6 +45,31 @@ namespace OpenTVDB.API.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Movies");
+                });
+
+            modelBuilder.Entity("OpenTVDB.API.Entities.SearchItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Slug")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id", "Type");
+
+                    b.ToTable((string)null);
+
+                    b.ToView("View_SearchItems", (string)null);
                 });
 
             modelBuilder.Entity("OpenTVDB.API.Entities.Series", b =>

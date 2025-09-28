@@ -21,7 +21,7 @@ public class SeriesControllerIntegrationTests(WebApplicationFactoryTest factory)
 
         var client = Factory.CreateClient();
 
-        var response = await client.GetAsync("/Series");
+        var response = await client.GetAsync("/api/series");
         var series = await response.Content.ReadFromJsonAsync<List<Series>>();
 
         series.Should().NotBeNull();
@@ -43,7 +43,7 @@ public class SeriesControllerIntegrationTests(WebApplicationFactoryTest factory)
         await Context.SaveChangesAsync();
 
         var client = Factory.CreateClient();
-        var series = await client.GetFromJsonAsync<List<Series>>("/Series".SetQueryParams(queryParams));
+        var series = await client.GetFromJsonAsync<List<Series>>("/api/series".SetQueryParams(queryParams));
 
         series.Should().NotBeNull();
         series.Count.Should().Be(1);
@@ -63,7 +63,7 @@ public class SeriesControllerIntegrationTests(WebApplicationFactoryTest factory)
 
         var client = Factory.CreateClient();
 
-        var response = await client.GetAsync($"/Series/{expectedSeries.Id}");
+        var response = await client.GetAsync($"/api/series/{expectedSeries.Id}");
         var series = await response.Content.ReadFromJsonAsync<Series>();
 
         series.Should().BeEquivalentTo(expectedSeries);
@@ -74,7 +74,7 @@ public class SeriesControllerIntegrationTests(WebApplicationFactoryTest factory)
     {
         var client = Factory.CreateClient();
 
-        var response = await client.GetAsync($"/Series/{Guid.NewGuid()}");
+        var response = await client.GetAsync($"/api/series/{Guid.NewGuid()}");
 
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
@@ -90,7 +90,7 @@ public class SeriesControllerIntegrationTests(WebApplicationFactoryTest factory)
 
         var client = Factory.CreateClient();
 
-        var response = await client.PostAsJsonAsync("/Series", expectedSeries);
+        var response = await client.PostAsJsonAsync("/api/series", expectedSeries);
         var series = await response.Content.ReadFromJsonAsync<Series>();
 
         series.Should().NotBeNull();
@@ -113,7 +113,7 @@ public class SeriesControllerIntegrationTests(WebApplicationFactoryTest factory)
 
         var client = Factory.CreateClient();
 
-        var response = await client.PutAsJsonAsync($"/Series/{expectedSeries.Id}", expectedSeries);
+        var response = await client.PutAsJsonAsync($"/api/series/{expectedSeries.Id}", expectedSeries);
         var series = await response.Content.ReadFromJsonAsync<Series>();
 
         series.Should().NotBeNull();
@@ -128,7 +128,7 @@ public class SeriesControllerIntegrationTests(WebApplicationFactoryTest factory)
 
         var client = Factory.CreateClient();
 
-        var response = await client.PutAsJsonAsync($"/Series/{expectedSeries.Id}", expectedSeries);
+        var response = await client.PutAsJsonAsync($"/api/series/{expectedSeries.Id}", expectedSeries);
 
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
@@ -138,7 +138,7 @@ public class SeriesControllerIntegrationTests(WebApplicationFactoryTest factory)
     {
         var client = Factory.CreateClient();
 
-        var response = await client.PutAsJsonAsync($"/Series/{Guid.NewGuid()}", DataFactory.Series());
+        var response = await client.PutAsJsonAsync($"/api/series/{Guid.NewGuid()}", DataFactory.Series());
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
 

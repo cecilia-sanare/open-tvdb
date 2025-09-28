@@ -6,10 +6,12 @@ namespace OpenTVDB.API.Tests;
 public static class DataFactory
 {
     private static Faker<Series> SeriesFaker => new Faker<Series>()
-        .RuleFor(x => x.Title, f => f.Random.Words(4));
+        .RuleFor(x => x.Title, f => f.Random.Words(4))
+        .RuleFor(x => x.Slug, f => f.Random.Words(4).ToLower().Replace(' ', '-'));
 
     private static Faker<Movie> MovieFaker => new Faker<Movie>()
-        .RuleFor(x => x.Title, f => f.Random.Words(4));
+        .RuleFor(x => x.Title, f => f.Random.Words(4))
+        .RuleFor(x => x.Slug, f => f.Random.Words(4).ToLower().Replace(' ', '-'));
 
     public static Series Series() => One(SeriesFaker, null);
     public static Series Series(Action<Series> customizer) => One(SeriesFaker, customizer);

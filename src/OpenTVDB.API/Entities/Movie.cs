@@ -13,4 +13,8 @@ public class Movie : AuditEntity
     [MaxLength(100)]
     [Description("The title of the movie")]
     public required string Title { get; set; }
+
+    [MaxLength(100)]
+    [Description("The slug of the movie")]
+    public required string Slug { get; set; }
 }

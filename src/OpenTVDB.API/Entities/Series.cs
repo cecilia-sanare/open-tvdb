@@ -13,4 +13,8 @@ public class Series : AuditEntity
     [MaxLength(100)]
     [Description("The title of the series")]
     public required string Title { get; set; }
+
+    [MaxLength(100)]
+    [Description("The slug of the series")]
+    public required string Slug { get; set; }
 }

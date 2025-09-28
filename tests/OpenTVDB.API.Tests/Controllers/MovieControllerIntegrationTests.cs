@@ -20,7 +20,7 @@ public class MovieControllerIntegrationTests(WebApplicationFactoryTest factory) 
 
         var client = Factory.CreateClient();
 
-        var response = await client.GetAsync("/Movie");
+        var response = await client.GetAsync("/api/movie");
         var movie = await response.Content.ReadFromJsonAsync<List<Movie>>();
 
         movie.Should().NotBeNull();
@@ -42,7 +42,7 @@ public class MovieControllerIntegrationTests(WebApplicationFactoryTest factory) 
         await Context.SaveChangesAsync();
 
         var client = Factory.CreateClient();
-        var movies = await client.GetFromJsonAsync<List<Movie>>("/Movie".SetQueryParams(queryParams));
+        var movies = await client.GetFromJsonAsync<List<Movie>>("/api/movie".SetQueryParams(queryParams));
 
         movies.Should().NotBeNull();
         movies.Count.Should().Be(1);
@@ -62,7 +62,7 @@ public class MovieControllerIntegrationTests(WebApplicationFactoryTest factory) 
 
         var client = Factory.CreateClient();
 
-        var response = await client.GetAsync($"/Movie/{expectedMovie.Id}");
+        var response = await client.GetAsync($"/api/movie/{expectedMovie.Id}");
         var movie = await response.Content.ReadFromJsonAsync<Movie>();
 
         movie.Should().BeEquivalentTo(expectedMovie);
@@ -73,7 +73,7 @@ public class MovieControllerIntegrationTests(WebApplicationFactoryTest factory) 
     {
         var client = Factory.CreateClient();
 
-        var response = await client.GetAsync($"/Movie/{Guid.NewGuid()}");
+        var response = await client.GetAsync($"/api/movie/{Guid.NewGuid()}");
 
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
@@ -89,7 +89,9 @@ public class MovieControllerIntegrationTests(WebApplicationFactoryTest factory) 
 
         var client = Factory.CreateClient();
 
-        var response = await client.PostAsJsonAsync("/Movie", expectedMovie);
+        var response = await client.PostAsJsonAsync("/api/movie", expectedMovie);
+
+        response.EnsureSuccessStatusCode();
         var movie = await response.Content.ReadFromJsonAsync<Movie>();
 
         movie.Should().NotBeNull();
@@ -111,7 +113,7 @@ public class MovieControllerIntegrationTests(WebApplicationFactoryTest factory) 
 
         var client = Factory.CreateClient();
 
-        var response = await client.PutAsJsonAsync($"/Movie/{expectedMovie.Id}", expectedMovie);
+        var response = await client.PutAsJsonAsync($"/api/movie/{expectedMovie.Id}", expectedMovie);
         var movie = await response.Content.ReadFromJsonAsync<Movie>();
 
         movie.Should().NotBeNull();
@@ -126,7 +128,7 @@ public class MovieControllerIntegrationTests(WebApplicationFactoryTest factory) 
 
         var client = Factory.CreateClient();
 
-        var response = await client.PutAsJsonAsync($"/Movie/{expectedMovie.Id}", expectedMovie);
+        var response = await client.PutAsJsonAsync($"/api/movie/{expectedMovie.Id}", expectedMovie);
 
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
@@ -136,7 +138,7 @@ public class MovieControllerIntegrationTests(WebApplicationFactoryTest factory) 
     {
         var client = Factory.CreateClient();
 
-        var response = await client.PutAsJsonAsync($"/Movie/{Guid.NewGuid()}", DataFactory.Movie());
+        var response = await client.PutAsJsonAsync($"/api/movie/{Guid.NewGuid()}", DataFactory.Movie());
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
 
